@@ -1,5 +1,5 @@
 {
-  "name": "trabajo-5-mateodebenedictis",
+  "name": "trabajo-9-mateodebenedictis",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "express": "^4.18.2",
     "knex": "^2.3.0",
     "mysql": "^2.18.1",

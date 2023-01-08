@@ -3,6 +3,7 @@ const { Server: SocketServer } = require('socket.io');
 const { Server: HttpServer } = require('http');
 const {config, configSqlite3} = require('./database/connection');
 const createTables = require('./database/createTables');
+const productosRouter = require('./router/productos');
 
 const Contenedor = require('./containers/Contenedor');
 const ContenedorSQL = require('./containers/ContenedorSQL');
@@ -14,6 +15,8 @@ const io = new SocketServer(httpServer);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); 
 app.use(express.static('public'));
+app.use('/api', productosRouter);
+
 
 //crea las tablas correspondientes y si existen las elimina y las vuelve a crear
 createTables();
@@ -42,10 +45,6 @@ io.on('connection', async (socket) => {
     });
 
 });
-
-// app.get('/productos', (req, res) => {
-//     res.render('public/productos.html');
-// });
 
 
 const port = 8080;
