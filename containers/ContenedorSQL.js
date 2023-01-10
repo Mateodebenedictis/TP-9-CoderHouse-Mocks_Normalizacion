@@ -7,7 +7,7 @@ class ContenedorSQL {
         this.table = table;
     }
 
-    
+
     async save(objeto) {
 
         try {
@@ -19,9 +19,6 @@ class ContenedorSQL {
         }
 
     }
-
-
-   
 
     async getAll() { 
 

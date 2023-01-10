@@ -4,8 +4,10 @@ const { Server: HttpServer } = require('http');
 const {config, configSqlite3} = require('./database/connection');
 const createTables = require('./database/createTables');
 const productosRouter = require('./router/productos');
+const { normalize, schema } = require('normalizr');
 
-const Contenedor = require('./containers/Contenedor');
+
+const ContenedorArchivo = require('./containers/ContenedorArchivo');
 const ContenedorSQL = require('./containers/ContenedorSQL');
 
 const app = express();
@@ -13,7 +15,7 @@ const httpServer = new HttpServer(app);
 const io = new SocketServer(httpServer);
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.static('public'));
 app.use('/api', productosRouter);
 
@@ -23,19 +25,43 @@ createTables();
 
 const contenedorProductos = new ContenedorSQL(config, 'productos');
 
-const contenedorMensajes = new ContenedorSQL(configSqlite3 ,'mensajes');
+const contenedorMensajes = new ContenedorArchivo('mensajes.txt')
+
+
+//Defining the schemas for normalizr for the messages
+
+const author = new schema.Entity('author', {}, { idAttribute: 'id' });
+const text = new schema.Entity('text');
+const date = new schema.Entity('date');
+
+const message = new schema.Entity('message', {
+    author: author,
+    text: text,
+    date: date
+}, { idAttribute: 'id' });
 
 
 io.on('connection', async (socket) => {
 
     console.log('socket id: ', socket.id);
-    socket.emit('conversation', await contenedorMensajes.getAll());
+
+    //Obtengo los mensajes y los normalizo
+    let messages = await contenedorMensajes.getAll();
+    let normalizedMessages = normalize(messages, [message]);
+
+    socket.emit('conversation', normalizedMessages);
     socket.emit('productos', await contenedorProductos.getAll());
     
     socket.on('new-message', async (message) => {
+        
         console.log('nuevo mensaje');
         await contenedorMensajes.save(message);
-        io.sockets.emit('conversation', await contenedorMensajes.getAll());
+
+        //Obtengo los mensajes y los normalizo
+        let newMessages = await contenedorMensajes.getAll();
+        let normalizedNewMessages = normalize(newMessages, [message]);
+
+        io.sockets.emit('conversation', normalizedNewMessages);
     });
 
     socket.on('new-producto', async (producto) => {

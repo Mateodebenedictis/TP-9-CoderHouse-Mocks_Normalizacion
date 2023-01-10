@@ -1,4 +1,4 @@
-const ContenedorMemoria = require('../contenedores/ContenedorMemoria');
+const ContenedorMemoria = require('../containers/ContenedorMemoria');
 const {generarProducto} = require('../utils/generadorDeProductos');
 const {generarId} = require('../utils/generadorDeIds');
 
