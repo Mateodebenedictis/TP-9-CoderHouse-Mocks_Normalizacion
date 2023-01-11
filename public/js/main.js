@@ -1,9 +1,7 @@
 const socket = io(); //emitimos el evento connection que el socket server esta escuchando
 
-//PROFE NO PUEDO IMPORTAR NORMALIZR, COMO PODRIA HACERLO? 
-//const { denormalize, schema } = normalizr;
-//import { denormalize, schema } from 'normalizr';
 //const { denormalize, schema } = require('normalizr');
+import { denormalize, schema } from 'normalizr';
 
 socket.on('productos', (productos) => {
     
@@ -49,7 +47,7 @@ socket.on('conversation', (messages) => {
 
     //Denormalizo los mensajes
 
-    let messages = denormalize(messages.result, [message], messages.entities);
+    messages = denormalize(messages.result, [message], messages.entities);
     let mensajesDesnormalizadosLength = JSON.stringify(messages).length;
 
     //Calculo el porcentaje de compresión
