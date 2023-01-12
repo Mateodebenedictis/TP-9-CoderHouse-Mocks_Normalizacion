@@ -1,7 +1,6 @@
 const socket = io(); //emitimos el evento connection que el socket server esta escuchando
 
-//const { denormalize, schema } = require('normalizr');
-import { denormalize, schema } from 'normalizr';
+const { denormalize, schema } = normalizr;
 
 socket.on('productos', (productos) => {
     
@@ -27,27 +26,28 @@ socket.on('productos', (productos) => {
     
 });
 
+//Defining the schemas for normalizr for the messages
+
+const author = new schema.Entity('author', {}, { idAttribute: 'id' });
+const text = new schema.Entity('text');
+const date = new schema.Entity('date');
+
+const message = new schema.Entity('message', {
+    author: author
+}, { idAttribute: 'id' });
+
 socket.on('conversation', (messages) => {
-
-    //Defining the schemas for normalizr for the messages
-
-    const author = new schema.Entity('author', {}, { idAttribute: 'id' });
-    const text = new schema.Entity('text');
-    const date = new schema.Entity('date');
-
-    const message = new schema.Entity('message', {
-        author: author,
-        text: text,
-        date: date
-    }, { idAttribute: 'id' });
 
     console.log(messages);
 
-    let mensajesNormalizadosLength = JSON.parse(messages).length;
+    let mensajesNormalizadosLength = JSON.stringify(messages).length;
 
     //Denormalizo los mensajes
 
     messages = denormalize(messages.result, [message], messages.entities);
+
+    console.log(messages);
+
     let mensajesDesnormalizadosLength = JSON.stringify(messages).length;
 
     //Calculo el porcentaje de compresión
@@ -64,7 +64,11 @@ socket.on('conversation', (messages) => {
 
     //Asignar el porcentaje al elemento de la vista
 
-    const porcentajeHtml = `<h1 class="text-center">Porcentaje de compresión: ${porcentaje.toFixed(2)}%</h1>`
+    console.log(mensajesNormalizadosLength)
+    console.log(mensajesDesnormalizadosLength)
+    console.log(porcentaje)
+
+    const porcentajeHtml = `<h1 class="titulo">Centro de Mensajes (Compresión: ${porcentaje.toFixed(2)}%)</h1>`
 
     document.getElementById('porcentaje').innerHTML = porcentajeHtml;
 

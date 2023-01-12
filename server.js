@@ -35,33 +35,30 @@ const text = new schema.Entity('text');
 const date = new schema.Entity('date');
 
 const message = new schema.Entity('message', {
-    author: author,
-    text: text,
-    date: date
+    author: author
 }, { idAttribute: 'id' });
+
+const normalizedMessages = async () => {
+    //Obtengo los mensajes y los normalizo
+    let mensajes = await contenedorMensajes.getAll();
+    return normalize(mensajes, [message]);
+}
+
+
 
 
 io.on('connection', async (socket) => {
 
     console.log('socket id: ', socket.id);
 
-    //Obtengo los mensajes y los normalizo
-    let messages = await contenedorMensajes.getAll();
-    let normalizedMessages = normalize(messages, [message]);
-
-    socket.emit('conversation', normalizedMessages);
+    socket.emit('conversation', await normalizedMessages());
     socket.emit('productos', await contenedorProductos.getAll());
     
     socket.on('new-message', async (message) => {
         
         console.log('nuevo mensaje');
         await contenedorMensajes.save(message);
-
-        //Obtengo los mensajes y los normalizo
-        let newMessages = await contenedorMensajes.getAll();
-        let normalizedNewMessages = normalize(newMessages, [message]);
-
-        io.sockets.emit('conversation', normalizedNewMessages);
+        io.sockets.emit('conversation', await normalizedMessages());
     });
 
     socket.on('new-producto', async (producto) => {
